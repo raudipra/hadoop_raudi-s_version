@@ -1519,8 +1519,10 @@ public class LeafQueue extends AbstractCSQueue {
       Map<ContainerID, RMContainer> liveContainers = application.getLiveContainersMap();
       List<String> liveRMContainers = new ArrayList<String>();
       for (Map.Entry<ContainerID, RMContainer> entry : liveContainers.entrySet()) {
+          LOG.info("Raudi : List of nodes :");
           if (!liveRMContainers.contains(entry.getValue().getContainer().getNodeID().getHost())) {
             liveRMContainers.add(entry.getValue().getContainer().getNodeID().getHost());
+            LOG.info("Raudi : "+entry.getValue().getContainer().getNodeID().getHost());
           }
       }
       if ((liveRMContainers.size() == 0) || ((liveRMContainers.size() == 1) && (container.getNodeID().getHost() == liveRMContainers.get(0)))) {
