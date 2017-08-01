@@ -71,6 +71,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerApplicat
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerUtils;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaSchedulerApp;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaSchedulerNode;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.AppSchedulingInfo;
 import org.apache.hadoop.yarn.server.utils.BuilderUtils;
 import org.apache.hadoop.yarn.server.utils.Lock;
 import org.apache.hadoop.yarn.server.utils.Lock.NoLock;
@@ -1516,20 +1517,20 @@ public class LeafQueue extends AbstractCSQueue {
       createdContainer.setValue(allocatedContainer);
 
       /* Raudi */
-      Map<ContainerID, RMContainer> liveContainers = application.getLiveContainersMap();
+      Map<ContainerId, RMContainer> liveContainers = application.getLiveContainersMap();
       List<String> liveRMContainers = new ArrayList<String>();
-      for (Map.Entry<ContainerID, RMContainer> entry : liveContainers.entrySet()) {
+      for (Map.Entry<ContainerId, RMContainer> entry : liveContainers.entrySet()) {
           LOG.info("Raudi : List of nodes :");
-          if (!liveRMContainers.contains(entry.getValue().getContainer().getNodeID().getHost())) {
-            liveRMContainers.add(entry.getValue().getContainer().getNodeID().getHost());
-            LOG.info("Raudi : "+entry.getValue().getContainer().getNodeID().getHost());
+          if (!liveRMContainers.contains(entry.getValue().getContainer().getNodeId().getHost())) {
+            liveRMContainers.add(entry.getValue().getContainer().getNodeId().getHost());
+            LOG.info("Raudi : "+entry.getValue().getContainer().getNodeId().getHost());
           }
       }
-      if ((liveRMContainers.size() == 0) || ((liveRMContainers.size() == 1) && (container.getNodeID().getHost() == liveRMContainers.get(0)))) {
+      if ((liveRMContainers.size() == 0) || ((liveRMContainers.size() == 1) && (container.getNodeId().getHost() == liveRMContainers.get(0)))) {
         AppSchedulingInfo appSchedulingInfo = application.getAppSchedulingInfo();
-        if ((scheduler.getNumClusterNodes()-appSchedulingInfo.getBlackListForPathDiversity()) > 1) {
+        if ((scheduler.getNumClusterNodes()-appSchedulingInfo.getBlackListForPathDiversity().size()) > 1) {
           List<String> blacklistAddition = new ArrayList<String>();
-          blacklistAddition.add(container.getNodeID().getHost());
+          blacklistAddition.add(container.getNodeId().getHost());
           appSchedulingInfo.updateBlacklist(blacklistAddition, Collections.EMPTY_LIST);
           appSchedulingInfo.updateBlacklistForPathDiversity(blacklistAddition, Collections.EMPTY_LIST);
           LOG.info("Raudi : blacklist added so this AM will have minimum 2 different nodes");

@@ -19,6 +19,7 @@
 package org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica;
 
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -129,9 +130,9 @@ public class FiCaSchedulerApp extends SchedulerApplicationAttempt {
 
     /* Raudi */
     // Remove from blacklist if in blacklist path diversity
-    if (isBlacklistedForPathDiversity(container.getNodeID().getHost())) {
+    if (isBlacklistedForPathDiversity(container.getNodeId().getHost())) {
       List<String> blacklistRemoval = new ArrayList<String>();
-      blacklistRemoval.add(container.getNodeID().getHost());
+      blacklistRemoval.add(container.getNodeId().getHost());
       appSchedulingInfo.updateBlacklist(Collections.EMPTY_LIST, blacklistRemoval);
       appSchedulingInfo.updateBlacklistForPathDiversity(Collections.EMPTY_LIST, blacklistRemoval);
       LOG.info("Raudi : node is removed from the blacklist because the container is finished/released");
