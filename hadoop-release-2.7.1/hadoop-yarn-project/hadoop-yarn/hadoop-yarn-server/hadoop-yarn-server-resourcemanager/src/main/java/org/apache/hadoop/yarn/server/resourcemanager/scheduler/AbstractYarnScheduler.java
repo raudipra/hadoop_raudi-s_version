@@ -482,9 +482,6 @@ public abstract class AbstractYarnScheduler
             attempt.getApplicationId(), containerId);
         }
       }
-      /* Raudi */
-      //possible here for remove node id in blacklist
-      /* Raudi End */
       completedContainer(rmContainer,
         SchedulerUtils.createAbnormalContainerStatus(containerId,
           SchedulerUtils.RELEASED_CONTAINER), RMContainerEventType.RELEASED);

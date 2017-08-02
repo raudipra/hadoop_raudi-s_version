@@ -140,12 +140,12 @@ public class ApplicationMasterService extends AbstractService implements
     this.server =
       rpc.getServer(ApplicationMasterProtocol.class, this, masterServiceAddress,
           serverConf, this.rmContext.getAMRMTokenSecretManager(),
-          serverConf.getInt(YarnConfiguration.RM_SCHEDULER_CLIENT_THREAD_COUNT,
+          serverConf.getInt(YarnConfiguration.RM_SCHEDULER_CLIENT_THREAD_COUNT, 
               YarnConfiguration.DEFAULT_RM_SCHEDULER_CLIENT_THREAD_COUNT));
-
+    
     // Enable service authorization?
     if (conf.getBoolean(
-        CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHORIZATION,
+        CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHORIZATION, 
         false)) {
       InputStream inputStream =
           this.rmContext.getConfigurationProvider()
@@ -156,7 +156,7 @@ public class ApplicationMasterService extends AbstractService implements
       }
       refreshServiceAcls(conf, RMPolicyProvider.getInstance());
     }
-
+    
     this.server.start();
     this.bindAddress =
         conf.updateConnectAddr(YarnConfiguration.RM_BIND_HOST,
@@ -263,10 +263,10 @@ public class ApplicationMasterService extends AbstractService implements
           appID, applicationAttemptId);
         throw new InvalidApplicationMasterRequestException(message);
       }
-
+      
       this.amLivelinessMonitor.receivedPing(applicationAttemptId);
       RMApp app = this.rmContext.getRMApps().get(appID);
-
+      
       // Setting the response id to 0 to identify if the
       // application master is register for the respective attemptid
       lastResponse.setResponseId(0);
@@ -293,7 +293,7 @@ public class ApplicationMasterService extends AbstractService implements
         LOG.info("Setting client token master key");
         response.setClientToAMTokenMasterKey(java.nio.ByteBuffer.wrap(rmContext
             .getClientToAMTokenSecretManager()
-            .getMasterKey(applicationAttemptId).getEncoded()));
+            .getMasterKey(applicationAttemptId).getEncoded()));        
       }
 
       // For work-preserving AM restart, retrieve previous attempts' containers
@@ -394,7 +394,7 @@ public class ApplicationMasterService extends AbstractService implements
     LOG.error(message);
     throw new InvalidApplicationMasterRequestException(message);
   }
-
+  
   /**
    * @param appAttemptId
    * @return true if application is registered for the respective attemptid
@@ -487,8 +487,8 @@ public class ApplicationMasterService extends AbstractService implements
               blacklistRequest.getBlacklistRemovals() : Collections.EMPTY_LIST;
       RMApp app =
           this.rmContext.getRMApps().get(applicationId);
-
-      // set label expression for Resource Requests if resourceName=ANY
+      
+      // set label expression for Resource Requests if resourceName=ANY 
       ApplicationSubmissionContext asc = app.getApplicationSubmissionContext();
       for (ResourceRequest req : ask) {
         if (null == req.getNodeLabelExpression()
@@ -496,7 +496,7 @@ public class ApplicationMasterService extends AbstractService implements
           req.setNodeLabelExpression(asc.getNodeLabelExpression());
         }
       }
-
+              
       // sanity check
       try {
         RMServerUtils.normalizeAndValidateRequests(ask,
@@ -506,7 +506,7 @@ public class ApplicationMasterService extends AbstractService implements
         LOG.warn("Invalid resource ask by application " + appAttemptId, e);
         throw e;
       }
-
+      
       try {
         RMServerUtils.validateBlacklistRequest(blacklistRequest);
       }  catch (InvalidResourceBlacklistRequestException e) {
@@ -527,23 +527,9 @@ public class ApplicationMasterService extends AbstractService implements
       }
 
       // Send new requests to appAttempt.
-      // Now allocated containers must be from different node/host
-      // while (!found) {
       Allocation allocation =
-        this.rScheduler.allocate(appAttemptId, ask, release,
-            blacklistAdditions, blacklistRemovals);
-        // List<Container> tempContainers = allocation.getContainers();
-      //   String firstNode = null;
-      //   for (Container tempContainer : tempContainers) {
-      //     if (firstNode == null) {
-      //       firstNode = tempContainer.getNodeID().getHost();
-      //     }
-      //     if (firstNode != tempContainer.getNodeID().getHost()) {
-      //       found = true;
-      //       break;
-      //     }
-      //   }
-      // }
+          this.rScheduler.allocate(appAttemptId, ask, release, 
+              blacklistAdditions, blacklistRemovals);
 
       if (!blacklistAdditions.isEmpty() || !blacklistRemovals.isEmpty()) {
         LOG.info("blacklist are updated in Scheduler." +
@@ -562,7 +548,7 @@ public class ApplicationMasterService extends AbstractService implements
       if(app.pullRMNodeUpdates(updatedNodes) > 0) {
         List<NodeReport> updatedNodeReports = new ArrayList<NodeReport>();
         for(RMNode rmNode: updatedNodes) {
-          SchedulerNodeReport schedulerNodeReport =
+          SchedulerNodeReport schedulerNodeReport =  
               rScheduler.getNodeReport(rmNode.getNodeID());
           Resource used = BuilderUtils.newResource(0, 0);
           int numContainers = 0;
@@ -582,19 +568,8 @@ public class ApplicationMasterService extends AbstractService implements
         }
         allocateResponse.setUpdatedNodes(updatedNodeReports);
       }
-      int iter = 1;
-      for(Container cont : allocation.getContainers()) {
-        LOG.info("This is host "+ iter + ": " +cont.getNodeId().getHost());
-        LOG.info("This is port "+ iter + ": " +cont.getNodeId().getPort());
-        iter++;
-      }
+
       allocateResponse.setAllocatedContainers(allocation.getContainers());
-      iter = 1;
-      for(Container cont : allocation.getContainers()) {
-        LOG.info("This is host "+ iter + ": " +cont.getNodeId().getHost());
-        LOG.info("This is port "+ iter + ": " +cont.getNodeId().getPort());
-        iter++;
-      }
       allocateResponse.setCompletedContainersStatuses(appAttempt
           .pullJustFinishedContainers());
       allocateResponse.setResponseId(lastResponse.getResponseId() + 1);
@@ -636,9 +611,9 @@ public class ApplicationMasterService extends AbstractService implements
        */
       lock.setAllocateResponse(allocateResponse);
       return allocateResponse;
-    }
+    }    
   }
-
+  
   private PreemptionMessage generatePreemptionMessage(Allocation allocation){
     PreemptionMessage pMsg = null;
     // assemble strict preemption request
@@ -687,7 +662,7 @@ public class ApplicationMasterService extends AbstractService implements
       contract.setResourceRequest(pRes);
       pMsg.setContract(contract);
     }
-
+    
     return pMsg;
   }
 
@@ -708,12 +683,12 @@ public class ApplicationMasterService extends AbstractService implements
     rmContext.getNMTokenSecretManager().unregisterApplicationAttempt(attemptId);
   }
 
-  public void refreshServiceAcls(Configuration configuration,
+  public void refreshServiceAcls(Configuration configuration, 
       PolicyProvider policyProvider) {
     this.server.refreshServiceAclWithLoadedConfiguration(configuration,
         policyProvider);
   }
-
+  
   @Override
   protected void serviceStop() throws Exception {
     if (this.server != null) {
@@ -721,18 +696,18 @@ public class ApplicationMasterService extends AbstractService implements
     }
     super.serviceStop();
   }
-
+  
   public static class AllocateResponseLock {
     private AllocateResponse response;
-
+    
     public AllocateResponseLock(AllocateResponse response) {
       this.response = response;
     }
-
+    
     public synchronized AllocateResponse getAllocateResponse() {
       return response;
     }
-
+    
     public synchronized void setAllocateResponse(AllocateResponse response) {
       this.response = response;
     }

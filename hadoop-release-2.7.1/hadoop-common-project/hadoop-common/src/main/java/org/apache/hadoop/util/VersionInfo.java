@@ -169,7 +169,7 @@ public class VersionInfo {
 
   public static void main(String[] args) {
     LOG.debug("version: "+ getVersion());
-    System.out.println("Hadoop " + "1000");
+    System.out.println("Hadoop " + getVersion());
     System.out.println("Subversion " + getUrl() + " -r " + getRevision());
     System.out.println("Compiled by " + getUser() + " on " + getDate());
     System.out.println("Compiled with protoc " + getProtocVersion());

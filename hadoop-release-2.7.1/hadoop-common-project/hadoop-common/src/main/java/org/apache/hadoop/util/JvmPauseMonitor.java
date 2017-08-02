@@ -183,7 +183,7 @@ public class JvmPauseMonitor {
         }
         long extraSleepTime = sw.now(TimeUnit.MILLISECONDS) - SLEEP_INTERVAL_MS;
         Map<String, GcTimes> gcTimesAfterSleep = getGcTimes();
-        LOG.info("Hello World, my name is Raudi");
+
         if (extraSleepTime > warnThresholdMs) {
           ++numGcWarnThresholdExceeded;
           LOG.warn(formatMessage(

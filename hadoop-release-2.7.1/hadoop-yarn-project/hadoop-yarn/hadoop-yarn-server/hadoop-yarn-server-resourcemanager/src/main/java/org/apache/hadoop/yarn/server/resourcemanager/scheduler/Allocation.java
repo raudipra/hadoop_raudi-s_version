@@ -28,7 +28,7 @@ import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.ResourceRequest;
 
 public class Allocation {
-
+  
   final List<Container> containers;
   final Resource resourceLimit;
   final Set<ContainerId> strictContainers;
@@ -73,7 +73,7 @@ public class Allocation {
   public List<ResourceRequest> getResourcePreemptions() {
     return fungibleResources;
   }
-
+    
   public List<NMToken> getNMTokens() {
     return nmTokens;
   }
