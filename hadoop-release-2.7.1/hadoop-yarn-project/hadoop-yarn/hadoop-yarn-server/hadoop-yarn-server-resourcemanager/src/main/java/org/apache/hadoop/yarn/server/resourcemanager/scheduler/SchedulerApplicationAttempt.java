@@ -482,20 +482,6 @@ public class SchedulerApplicationAttempt {
           blacklistAdditions, blacklistRemovals);
     }
   }
-
-  /* Raudi */
-  public synchronized void updateBlacklistForPathDiversity(
-      List<String> blacklistAdditions, List<String> blacklistRemovals) {
-    if (!isStopped) {
-      this.appSchedulingInfo.updateBlacklistForPathDiversity(
-          blacklistAdditions, blacklistRemovals);
-    }
-  }
-
-  public boolean isBlacklistedForPathDiversity(String resourceName) {
-    return this.appSchedulingInfo.isBlacklistedForPathDiversity(resourceName);
-  }
-  /* Raudi End */
   
   public boolean isBlacklisted(String resourceName) {
     return this.appSchedulingInfo.isBlacklisted(resourceName);
