@@ -71,6 +71,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerApplicat
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerUtils;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaSchedulerApp;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaSchedulerNode;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.AppSchedulingInfo;
 import org.apache.hadoop.yarn.server.utils.BuilderUtils;
 import org.apache.hadoop.yarn.server.utils.Lock;
 import org.apache.hadoop.yarn.server.utils.Lock.NoLock;
@@ -1514,6 +1515,29 @@ public class LeafQueue extends AbstractCSQueue {
           " queue=" + this + 
           " clusterResource=" + clusterResource);
       createdContainer.setValue(allocatedContainer);
+
+      /* Raudi */
+      Map<ContainerId, RMContainer> liveContainers = application.getLiveContainersMap();
+      List<String> liveRMContainers = new ArrayList<String>();
+      for (Map.Entry<ContainerId, RMContainer> entry : liveContainers.entrySet()) {
+          LOG.info("Raudi : List of nodes :");
+          if (!liveRMContainers.contains(entry.getValue().getContainer().getNodeId().getHost())) {
+            liveRMContainers.add(entry.getValue().getContainer().getNodeId().getHost());
+            LOG.info("Raudi : "+entry.getValue().getContainer().getNodeId().getHost());
+          }
+      }
+      if ((liveRMContainers.size() == 0) || ((liveRMContainers.size() == 1) && (container.getNodeId().getHost() == liveRMContainers.get(0)))) {
+        AppSchedulingInfo appSchedulingInfo = application.getAppSchedulingInfo();
+        if ((scheduler.getNumClusterNodes()-appSchedulingInfo.getBlackListForPathDiversity().size()) > 1) {
+          List<String> blacklistAddition = new ArrayList<String>();
+          blacklistAddition.add(container.getNodeId().getHost());
+          appSchedulingInfo.updateBlacklist(blacklistAddition, Collections.EMPTY_LIST);
+          appSchedulingInfo.updateBlacklistForPathDiversity(blacklistAddition, Collections.EMPTY_LIST);
+          LOG.info("Raudi : blacklist added so this AM will have minimum 2 different nodes");
+        }
+      }  
+      /* Raudi End */
+      
       return container.getResource();
     } else {
       // if we are allowed to allocate but this node doesn't have space, reserve it or

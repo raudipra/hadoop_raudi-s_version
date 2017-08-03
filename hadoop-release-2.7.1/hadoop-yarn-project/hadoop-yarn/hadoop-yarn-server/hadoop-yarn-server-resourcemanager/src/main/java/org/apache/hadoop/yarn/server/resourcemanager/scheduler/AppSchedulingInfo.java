@@ -68,6 +68,9 @@ public class AppSchedulingInfo {
   final Map<Priority, Map<String, ResourceRequest>> requests =
     new ConcurrentHashMap<Priority, Map<String, ResourceRequest>>();
   private Set<String> blacklist = new HashSet<String>();
+  /* Raudi */
+  private Set<String> blacklistForPathDiversity = new HashSet<String>();
+  /* Raudi End */
 
   //private final ApplicationStore store;
   private ActiveUsersManager activeUsersManager;
@@ -204,15 +207,48 @@ public class AppSchedulingInfo {
   synchronized public void updateBlacklist(
       List<String> blacklistAdditions, List<String> blacklistRemovals) {
     // Add to blacklist
+    /* Raudi */
+    List<String> blacklistRemovalsForPathDiversity = new ArrayList<String>();
     if (blacklistAdditions != null) {
+      for (String nodeBL : blacklistAdditions) {
+        if (blacklistForPathDiversity.contains(nodeBL)) {
+          blacklistRemovalsForPathDiversity.add(nodeBL);
+        }
+      }
+      if (blacklistRemovalsForPathDiversity != null){
+        blacklistForPathDiversity.removeAll(blacklistRemovalsForPathDiversity);
+        LOG.info("Raudi : found blacklist addition that alr in blacklistForPathDiversity, so remove it first from blacklistForPathDiversity!");
+      }
       blacklist.addAll(blacklistAdditions);
     }
+    /* Raudi End */
 
     // Remove from blacklist
     if (blacklistRemovals != null) {
       blacklist.removeAll(blacklistRemovals);
     }
   }
+
+  /* Raudi */
+  /**
+   * The ApplicationMaster is updating the blacklistForPathDiversity
+   *
+   * @param blacklistAdditions resources to be added to the blacklistForPathDiversity
+   * @param blacklistRemovals resources to be removed from the blacklistForPathDiversity
+   */
+  synchronized public void updateBlacklistForPathDiversity(
+      List<String> blacklistAdditions, List<String> blacklistRemovals) {
+    // Add to blacklist
+    if (blacklistAdditions != null) {
+      blacklistForPathDiversity.addAll(blacklistAdditions);
+    }
+
+    // Remove from blacklist
+    if (blacklistRemovals != null) {
+      blacklistForPathDiversity.removeAll(blacklistRemovals);
+    }
+  }
+  /* Raudi End */
 
   synchronized public Collection<Priority> getPriorities() {
     return priorities;
@@ -245,6 +281,12 @@ public class AppSchedulingInfo {
   public synchronized boolean isBlacklisted(String resourceName) {
     return blacklist.contains(resourceName);
   }
+
+  /* Raudi */
+  public synchronized boolean isBlacklistedForPathDiversity(String resourceName) {
+    return blacklistForPathDiversity.contains(resourceName);
+  }
+  /* Raudi End */
   
   /**
    * Resources have been allocated to this application by the resource
@@ -439,11 +481,20 @@ public class AppSchedulingInfo {
     return this.blacklist;
   }
 
+  /* Raudi */
+  public synchronized Set<String> getBlackListForPathDiversity() {
+    return this.blacklistForPathDiversity;
+  }
+  /* Raudi End */
+
   public synchronized void transferStateFromPreviousAppSchedulingInfo(
       AppSchedulingInfo appInfo) {
     //    this.priorities = appInfo.getPriorities();
     //    this.requests = appInfo.getRequests();
     this.blacklist = appInfo.getBlackList();
+    /* Raudi */
+    this.blacklistForPathDiversity = appInfo.getBlackListForPathDiversity();
+    /* Raudi End */
   }
 
   public synchronized void recoverContainer(RMContainer rmContainer) {
